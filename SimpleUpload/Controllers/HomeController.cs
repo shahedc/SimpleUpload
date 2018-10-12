@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using SimpleUpload.Models;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace SimpleUpload.Controllers
 {
@@ -69,8 +68,6 @@ namespace SimpleUpload.Controllers
                     // Create a container called 'quickstartblobs' and append a GUID value to it to make the name unique. 
                     cloudBlobContainer = cloudBlobClient.GetContainerReference("uploadblob" + Guid.NewGuid().ToString());
                     await cloudBlobContainer.CreateAsync();
-                    Console.WriteLine("Created container '{0}'", cloudBlobContainer.Name);
-                    Console.WriteLine();
 
                     // Set the permissions so the blobs are public. 
                     BlobContainerPermissions permissions = new BlobContainerPermissions
@@ -92,7 +89,7 @@ namespace SimpleUpload.Controllers
                 }
                 finally
                 {
-                    // OPTIONAL: Clean up resources. This includes the container and the two temp files.
+                    // OPTIONAL: Clean up resources, e.g. blob container
                     //if (cloudBlobContainer != null)
                     //{
                     //    await cloudBlobContainer.DeleteIfExistsAsync();
