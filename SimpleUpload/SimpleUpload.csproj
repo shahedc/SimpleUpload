@@ -10,7 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Views\Home\Success.cshtml">
+    <Content Update="Views\Home\UploadError.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Home\UploadSuccess.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
   </ItemGroup>
