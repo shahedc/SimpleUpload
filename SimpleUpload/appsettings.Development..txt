@@ -1,0 +1,10 @@
+{
+  "storageconnectionstring": "<REPLACE_CONN_STRING>",
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
+    }
+  }
+}
