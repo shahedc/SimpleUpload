@@ -65,7 +65,7 @@ namespace SimpleUpload.Controllers
                     // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
                     CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
 
-                    // Create a container called 'quickstartblobs' and append a GUID value to it to make the name unique. 
+                    // Create a container called 'uploadblob' and append a GUID value to it to make the name unique. 
                     cloudBlobContainer = cloudBlobClient.GetContainerReference("uploadblob" + Guid.NewGuid().ToString());
                     await cloudBlobContainer.CreateAsync();
 
@@ -77,7 +77,6 @@ namespace SimpleUpload.Controllers
                     await cloudBlobContainer.SetPermissionsAsync(permissions);
                     
                     // Get a reference to the blob address, then upload the file to the blob.
-                    // Use the value of localFileName for the blob name.
                     CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(filename);
                     await cloudBlockBlob.UploadFromByteArrayAsync(imageBuffer, 0, imageBuffer.Length);
 
