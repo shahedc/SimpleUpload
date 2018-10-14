@@ -33,15 +33,22 @@ namespace SimpleUpload.Controllers
 
             foreach (var formFile in files)
             {
-                if (formFile.Length <=0)
+                if (formFile.Length <= 0)
                 {
                     continue;
                 }
                 using (var ms = new MemoryStream())
                 {
                     formFile.CopyTo(ms);
-                    var fileBytes = ms.ToArray();
-                    uploadSuccess = await UploadToBlob(formFile.FileName, fileBytes);
+
+                    // NOTE: uncomment either OPTION A or OPTION B to use one approach over another
+
+                    // OPTION A: convert to byte array before upload
+                    //var fileBytes = ms.ToArray();
+                    //uploadSuccess = await UploadToBlob(formFile.FileName, fileBytes, null);
+
+                    // OPTION B: use memory stream for blob upload
+                    uploadSuccess = await UploadToBlob(formFile.FileName, null, ms);
                 }
             }
 
@@ -51,7 +58,7 @@ namespace SimpleUpload.Controllers
                 return View("UploadError");
         }
 
-        private async Task<bool> UploadToBlob(string filename, byte[] imageBuffer)
+        private async Task<bool> UploadToBlob(string filename, byte[] imageBuffer = null, MemoryStream ms = null)
         {
             CloudStorageAccount storageAccount = null;
             CloudBlobContainer cloudBlobContainer = null;
@@ -75,10 +82,23 @@ namespace SimpleUpload.Controllers
                         PublicAccess = BlobContainerPublicAccessType.Blob
                     };
                     await cloudBlobContainer.SetPermissionsAsync(permissions);
-                    
+
                     // Get a reference to the blob address, then upload the file to the blob.
                     CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(filename);
-                    await cloudBlockBlob.UploadFromByteArrayAsync(imageBuffer, 0, imageBuffer.Length);
+
+                    if (imageBuffer != null)
+                    {
+                        // OPTION A: use imageBuffer (converted from memory stream)
+                        await cloudBlockBlob.UploadFromByteArrayAsync(imageBuffer, 0, imageBuffer.Length);
+                    }
+                    else if (ms != null)
+                    {
+                        // OPTION B: pass in memory stream directly
+                        await cloudBlockBlob.UploadFromStreamAsync(ms);
+                    } else
+                    {
+                        return false;
+                    }
 
                     return true;
                 }
@@ -101,7 +121,7 @@ namespace SimpleUpload.Controllers
             }
 
         }
-        
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
