@@ -37,19 +37,24 @@ namespace SimpleUpload.Controllers
                 {
                     continue;
                 }
-                using (var ms = new MemoryStream())
+
+                // NOTE: uncomment either OPTION A or OPTION B to use one approach over another
+
+                // OPTION A: convert to byte array before upload
+                //using (var ms = new MemoryStream())
+                //{
+                //    formFile.CopyTo(ms);
+                //    var fileBytes = ms.ToArray();
+                //    uploadSuccess = await UploadToBlob(formFile.FileName, fileBytes, null);
+
+                //}
+
+                // OPTION B: read directly from stream for blob upload      
+                using (var stream = formFile.OpenReadStream())
                 {
-                    formFile.CopyTo(ms);
-
-                    // NOTE: uncomment either OPTION A or OPTION B to use one approach over another
-
-                    // OPTION A: convert to byte array before upload
-                    //var fileBytes = ms.ToArray();
-                    //uploadSuccess = await UploadToBlob(formFile.FileName, fileBytes, null);
-
-                    // OPTION B: use memory stream for blob upload
-                    uploadSuccess = await UploadToBlob(formFile.FileName, null, ms);
+                    uploadSuccess = await UploadToBlob(formFile.FileName, null, stream);
                 }
+                
             }
 
             if (uploadSuccess)
@@ -58,7 +63,7 @@ namespace SimpleUpload.Controllers
                 return View("UploadError");
         }
 
-        private async Task<bool> UploadToBlob(string filename, byte[] imageBuffer = null, MemoryStream ms = null)
+        private async Task<bool> UploadToBlob(string filename, byte[] imageBuffer = null, Stream stream = null)
         {
             CloudStorageAccount storageAccount = null;
             CloudBlobContainer cloudBlobContainer = null;
@@ -91,10 +96,10 @@ namespace SimpleUpload.Controllers
                         // OPTION A: use imageBuffer (converted from memory stream)
                         await cloudBlockBlob.UploadFromByteArrayAsync(imageBuffer, 0, imageBuffer.Length);
                     }
-                    else if (ms != null)
+                    else if (stream != null)
                     {
                         // OPTION B: pass in memory stream directly
-                        await cloudBlockBlob.UploadFromStreamAsync(ms);
+                        await cloudBlockBlob.UploadFromStreamAsync(stream);
                     } else
                     {
                         return false;
