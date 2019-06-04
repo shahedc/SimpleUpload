@@ -27,6 +27,11 @@ namespace SimpleUpload.Controllers
         }
 
         [HttpPost("UploadFiles")]
+        //OPTION A: Disables Asp.Net Core's default upload size limit
+        [DisableRequestSizeLimit]
+        //OPTION B: Uncomment to set a specified upload file limit
+        //[RequestSizeLimit(40000000)] 
+
         public async Task<IActionResult> Post(List<IFormFile> files)
         {
             var uploadSuccess = false;
