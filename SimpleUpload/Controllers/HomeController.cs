@@ -30,6 +30,7 @@ namespace SimpleUpload.Controllers
         public async Task<IActionResult> Post(List<IFormFile> files)
         {
             var uploadSuccess = false;
+            string uploadedUri = null;
 
             foreach (var formFile in files)
             {
@@ -52,7 +53,8 @@ namespace SimpleUpload.Controllers
                 // OPTION B: read directly from stream for blob upload      
                 using (var stream = formFile.OpenReadStream())
                 {
-                    uploadSuccess = await UploadToBlob(formFile.FileName, null, stream);
+                    (uploadSuccess, uploadedUri) = await UploadToBlob(formFile.FileName, null, stream);
+                    TempData["uploadedUri"] = uploadedUri;
                 }
                 
             }
@@ -63,7 +65,7 @@ namespace SimpleUpload.Controllers
                 return View("UploadError");
         }
 
-        private async Task<bool> UploadToBlob(string filename, byte[] imageBuffer = null, Stream stream = null)
+        private async Task<(bool, string)> UploadToBlob(string filename, byte[] imageBuffer = null, Stream stream = null)
         {
             CloudStorageAccount storageAccount = null;
             CloudBlobContainer cloudBlobContainer = null;
@@ -102,14 +104,14 @@ namespace SimpleUpload.Controllers
                         await cloudBlockBlob.UploadFromStreamAsync(stream);
                     } else
                     {
-                        return false;
+                        return (false, null);
                     }
 
-                    return true;
+                    return (true, cloudBlockBlob.SnapshotQualifiedStorageUri.PrimaryUri.ToString());
                 }
                 catch (StorageException ex)
                 {
-                    return false;
+                    return (false, null);
                 }
                 finally
                 {
@@ -122,7 +124,7 @@ namespace SimpleUpload.Controllers
             }
             else
             {
-                return false;
+                return (false, null);
             }
 
         }
